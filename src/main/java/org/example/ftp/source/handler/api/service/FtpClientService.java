@@ -3,19 +3,14 @@ package org.example.ftp.source.handler.api.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
-import org.example.ftp.source.handler.api.domain.Photo;
+import org.example.ftp.source.handler.api.domain.Photography;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,10 +21,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FtpClientService {
     private final FTPClient ftpClient;
-    private final ResourceLoader resourceLoader;
-    private final List<Photo> photoList = new ArrayList<>();
+    private final List<Photography> photoList = new ArrayList<>();
 
-    public List<Photo> findPhotosByPrefix(
+    public List<Photography> findPhotosByPrefix(
             String searchDirName,
             String photoPrefix
     ){
@@ -52,8 +46,7 @@ public class FtpClientService {
                 .body(resource);
     }
 
-
-    private List<Photo> findDirectoriesWithGivenName(
+    private List<Photography> findDirectoriesWithGivenName(
             String parentDir,
             String currentDir,
             int level,
@@ -94,23 +87,25 @@ public class FtpClientService {
         return photoList;
     }
 
-    private List<Photo> getPhotosWithGivenPrefixFromCurrentDir(String currentDirPath, String filePrefix) {
-        List<Photo> photosList;
-
+    private List<Photography> getPhotosWithGivenPrefixFromCurrentDir(String currentDirPath, String filePrefix) {
+        List<Photography> photosList;
+        FTPFile[] dir;
         try {
-            FTPFile[] dir = ftpClient.listFiles (currentDirPath);
-            photosList = Arrays.stream(dir)
-                    .filter(FTPFile::isFile)
-                    .filter(file -> file.getName().startsWith(filePrefix))
-                    .map(file -> new Photo(
-                            currentDirPath + File.separator + file.getName(),
-                            file.getTimestamp().getTime(),
-                            file.getSize() + " kb"
-                    ))
-                    .collect(Collectors.toList());
+            dir = ftpClient.listFiles (currentDirPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        photosList = Arrays.stream(dir)
+                .filter(FTPFile::isFile)
+                .filter(file -> file.getName().startsWith(filePrefix))
+                .map(file -> new Photography(
+                        currentDirPath + File.separator + file.getName(),
+                        file.getTimestamp().getTime(),
+                        file.getSize() + " kb"
+                ))
+                .collect(Collectors.toList());
+
         return photosList;
     }
 
@@ -121,8 +116,10 @@ public class FtpClientService {
         if (!folder.exists()) {
             folder.mkdir();
         }
+
         String destination = downloadPath + File.separator + fileName;
         try {
+
             FileOutputStream out = new FileOutputStream(destination);
             ftpClient.retrieveFile(source, out);
             out.close();

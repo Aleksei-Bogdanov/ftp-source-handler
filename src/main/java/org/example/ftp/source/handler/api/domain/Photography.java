@@ -10,7 +10,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Photo {
+public class Photography {
     private String fullPath;
     private Date createdAt;
     private String photoSize;

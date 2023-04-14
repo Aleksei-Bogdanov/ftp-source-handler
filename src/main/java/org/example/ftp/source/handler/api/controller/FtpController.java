@@ -1,11 +1,14 @@
 package org.example.ftp.source.handler.api.controller;
 
-import org.example.ftp.source.handler.api.domain.Photo;
+import org.example.ftp.source.handler.api.domain.Photography;
 import org.example.ftp.source.handler.api.service.FtpClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -16,8 +19,11 @@ public class FtpController {
     private FtpClientService ftpClientService;
 
     @GetMapping
-    public List<Photo> findPhotosByPrefix() {
-        return ftpClientService.findPhotosByPrefix("photos", "GRP327_");
+    public List<Photography> findPhotosByPrefix(
+            @RequestParam String searchDirName,
+            @RequestParam String photoPrefix
+    ) {
+        return ftpClientService.findPhotosByPrefix(searchDirName, photoPrefix);
     }
 
     @GetMapping("/photo")

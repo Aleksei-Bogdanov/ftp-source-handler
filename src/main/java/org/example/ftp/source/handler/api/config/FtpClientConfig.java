@@ -20,10 +20,8 @@ public class FtpClientConfig {
     @Bean("ftpClient")
     public FTPClient ftpClient() {
         ftp = new FTPClient();
-
         ftp.addProtocolCommandListener(new PrintCommandListener(new PrintWriter(System.out)));
-
-        try {
+        try{
             ftp.connect(server, port);
             int reply = ftp.getReplyCode();
             if (!FTPReply.isPositiveCompletion(reply)) {
@@ -31,7 +29,7 @@ public class FtpClientConfig {
                 throw new IOException("Exception in connecting to FTP Server");
             }
             ftp.login(user, password);
-        } catch (IOException e) {
+        }catch (IOException e){
             throw new RuntimeException(e);
         }
 
