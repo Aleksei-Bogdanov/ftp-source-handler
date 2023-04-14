@@ -1,6 +1,8 @@
 package org.example.ftp.source.handler.api.service;
 
 import lombok.SneakyThrows;
+import org.apache.commons.net.ftp.FTPClient;
+import org.example.ftp.source.handler.api.config.FtpClientConfig;
 import org.example.ftp.source.handler.api.domain.Photography;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,8 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class FtpClientServiceTest {
     private FakeFtpServer fakeFtpServer;
 
-    @Mock
-    private FtpClient ftpClient;
+    private FTPClient ftpClient;
 
     @Mock
     private FtpClientService ftpClientService;
@@ -50,15 +51,16 @@ class FtpClientServiceTest {
 
         fakeFtpServer.start();
 
-        ftpClient = new FtpClient("localhost", fakeFtpServer.getServerControlPort(), "user", "password");
-        ftpClient.open();
+        ftpClient = new FTPClient();
+        ftpClient.connect("localhost", fakeFtpServer.getServerControlPort());
+        ftpClient.login("user", "password");
+
         ftpClientService = new FtpClientService(ftpClient);
     }
 
     @AfterEach
     @SneakyThrows
     public void teardown(){
-        ftpClient.close();
         fakeFtpServer.stop();
     }
 
